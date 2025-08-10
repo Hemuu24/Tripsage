@@ -80,3 +80,5 @@ Ready to start sharing your travel adventures? Sign up and become part of a glob
 ---
 
 *Built with ❤️ for travelers everywhere*
+
+<!-- Last updated: August 10, 2025 -->
