@@ -5,9 +5,9 @@ import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+
 import { Checkbox } from "@/components/ui/checkbox"
-import { Mail, Lock, Eye, EyeOff, User, Facebook, Chrome } from "lucide-react"
+import { Mail, Lock, Eye, EyeOff, User } from "lucide-react"
 import { Logo } from "@/components/logo"
 import { supabase } from '@/lib/supabaseClient'
 
@@ -71,30 +71,7 @@ export default function SignupPage() {
           </CardHeader>
 
           <CardContent className="space-y-6">
-            {/* Social Signup */}
-            <div className="space-y-3">
-              <Button variant="outline" className="w-full btn-minimal-outline h-12" size="lg">
-                <div className="flex items-center justify-center w-full space-x-3">
-                  <Chrome className="h-5 w-5" />
-                  <span>Sign up with Google</span>
-                </div>
-              </Button>
-              <Button variant="outline" className="w-full btn-minimal-outline h-12" size="lg">
-                <div className="flex items-center justify-center w-full space-x-3">
-                  <Facebook className="h-5 w-5" />
-                  <span>Sign up with Facebook</span>
-                </div>
-              </Button>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or sign up with email</span>
-              </div>
-            </div>
+            {/* Signup form starts here */}
 
             {/* Signup Form */}
             <form className="space-y-4" onSubmit={handleSignup}>
