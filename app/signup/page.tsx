@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Mail, Lock, Eye, EyeOff, User } from "lucide-react"
 import { Logo } from "@/components/logo"
-import { supabase } from '@/lib/supabaseClient'
+import { supabase, getAuthRedirectUrl } from '@/lib/supabaseClient'
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -41,7 +41,13 @@ export default function SignupPage() {
       return
     }
     const { email, password } = formData
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: {
+        emailRedirectTo: getAuthRedirectUrl()
+      }
+    })
     if (error) {
       setError(error.message)
     } else {
