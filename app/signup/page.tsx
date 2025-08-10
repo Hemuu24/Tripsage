@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Mail, Lock, Eye, EyeOff, User, Facebook, Chrome } from "lucide-react"
 import { Logo } from "@/components/logo"
+import { supabase } from '@/lib/supabaseClient'
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -21,9 +22,36 @@ export default function SignupPage() {
     confirmPassword: "",
   })
   const [agreeToTerms, setAgreeToTerms] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    setSuccess(null)
+    setLoading(true)
+    if (!agreeToTerms) {
+      setError('You must agree to the terms.')
+      setLoading(false)
+      return
+    }
+    const { email, password } = formData
+    const { data, error } = await supabase.auth.signUp({ email, password })
+    if (error) {
+      setError(error.message)
+    } else {
+      setSuccess('Signup successful! Please check your email to confirm your account.')
+      // Redirect to login after successful signup
+      setTimeout(() => {
+        window.location.href = '/login'
+      }, 3000)
+    }
+    setLoading(false)
   }
 
   return (
@@ -45,13 +73,17 @@ export default function SignupPage() {
           <CardContent className="space-y-6">
             {/* Social Signup */}
             <div className="space-y-3">
-              <Button variant="outline" className="w-full btn-minimal-outline" size="lg">
-                <Chrome className="mr-2 h-4 w-4" />
-                Sign up with Google
+              <Button variant="outline" className="w-full btn-minimal-outline h-12" size="lg">
+                <div className="flex items-center justify-center w-full space-x-3">
+                  <Chrome className="h-5 w-5" />
+                  <span>Sign up with Google</span>
+                </div>
               </Button>
-              <Button variant="outline" className="w-full btn-minimal-outline" size="lg">
-                <Facebook className="mr-2 h-4 w-4" />
-                Sign up with Facebook
+              <Button variant="outline" className="w-full btn-minimal-outline h-12" size="lg">
+                <div className="flex items-center justify-center w-full space-x-3">
+                  <Facebook className="h-5 w-5" />
+                  <span>Sign up with Facebook</span>
+                </div>
               </Button>
             </div>
 
@@ -65,21 +97,21 @@ export default function SignupPage() {
             </div>
 
             {/* Signup Form */}
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSignup}>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label htmlFor="firstName" className="text-sm font-semibold">
                     First Name
                   </label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 z-10" />
                     <Input
                       id="firstName"
                       type="text"
                       placeholder="First name"
                       value={formData.firstName}
                       onChange={(e) => handleInputChange("firstName", e.target.value)}
-                      className="input-minimal pl-10"
+                      className="input-with-icon pl-12 pr-4"
                       required
                     />
                   </div>
@@ -106,14 +138,14 @@ export default function SignupPage() {
                   Email
                 </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 z-10" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="input-minimal pl-10"
+                    className="input-with-icon pl-12 pr-4"
                     required
                   />
                 </div>
@@ -124,14 +156,14 @@ export default function SignupPage() {
                   Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 z-10" />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a password"
                     value={formData.password}
                     onChange={(e) => handleInputChange("password", e.target.value)}
-                    className="input-minimal pl-10 pr-10"
+                    className="input-with-icon pl-12 pr-12"
                     required
                   />
                   <Button
@@ -155,14 +187,14 @@ export default function SignupPage() {
                   Confirm Password
                 </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                  <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4 z-10" />
                   <Input
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
                     onChange={(e) => handleInputChange("confirmPassword", e.target.value)}
-                    className="input-minimal pl-10 pr-10"
+                    className="input-with-icon pl-12 pr-12"
                     required
                   />
                   <Button
@@ -198,10 +230,12 @@ export default function SignupPage() {
                 </label>
               </div>
 
-              <Button type="submit" className="w-full btn-minimal" size="lg" disabled={!agreeToTerms}>
-                Create Account
+              <Button type="submit" className="w-full btn-minimal" size="lg" disabled={!agreeToTerms || loading}>
+                {loading ? 'Creating Account...' : 'Create Account'}
               </Button>
             </form>
+            {error && <div className="text-red-500 text-sm text-center mt-2">{error}</div>}
+            {success && <div className="text-green-600 text-sm text-center mt-2">{success}</div>}
 
             <div className="text-center text-sm">
               <span className="text-muted-foreground">Already have an account? </span>

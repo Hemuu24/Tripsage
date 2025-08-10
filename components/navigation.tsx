@@ -11,11 +11,25 @@ import {
 } from "@/components/ui/navigation-menu"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Badge } from "@/components/ui/badge"
-import { Menu, Search, Bell, Compass, Users, Calendar, Camera, MessageCircle } from "lucide-react"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { 
+  Menu, 
+  Search, 
+  Bell, 
+  Compass, 
+  Users, 
+  Calendar, 
+  Camera, 
+  MessageCircle,
+  LogOut,
+  User
+} from "lucide-react"
 import { Logo } from "./logo"
+import { useAuth } from "@/hooks/use-auth"
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
+  const { user, signOut } = useAuth()
 
   const navItems = [
     { href: "/discover", label: "Discover", icon: Compass },
@@ -24,6 +38,10 @@ export function Navigation() {
     { href: "/journal", label: "Journal", icon: Camera },
     { href: "/forum", label: "Forum", icon: MessageCircle },
   ]
+
+  const handleSignOut = async () => {
+    await signOut()
+  }
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -63,12 +81,29 @@ export function Navigation() {
           </Button>
 
           <div className="hidden md:flex items-center space-x-3">
-            <Button variant="ghost" asChild className="hover:bg-muted">
-              <Link href="/login">Login</Link>
-            </Button>
-            <Button className="btn-minimal" asChild>
-              <Link href="/signup">Join TripSage</Link>
-            </Button>
+            {user ? (
+              <>
+                <Button variant="ghost" asChild className="hover:bg-muted">
+                  <Link href="/profile">
+                    <User className="h-4 w-4 mr-2" />
+                    Profile
+                  </Link>
+                </Button>
+                <Button variant="ghost" onClick={handleSignOut} className="hover:bg-muted">
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild className="hover:bg-muted">
+                  <Link href="/login">Login</Link>
+                </Button>
+                <Button className="btn-minimal" asChild>
+                  <Link href="/signup">Join TripSage</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu */}
@@ -93,12 +128,29 @@ export function Navigation() {
                 ))}
                 <div className="pt-6 border-t border-border">
                   <div className="flex flex-col space-y-3">
-                    <Button variant="ghost" asChild className="hover:bg-muted">
-                      <Link href="/login">Login</Link>
-                    </Button>
-                    <Button className="btn-minimal" asChild>
-                      <Link href="/signup">Join TripSage</Link>
-                    </Button>
+                    {user ? (
+                      <>
+                        <Button variant="ghost" asChild className="hover:bg-muted justify-start">
+                          <Link href="/profile">
+                            <User className="h-5 w-5 mr-3" />
+                            Profile
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" onClick={handleSignOut} className="hover:bg-muted justify-start">
+                          <LogOut className="h-5 w-5 mr-3" />
+                          Logout
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="ghost" asChild className="hover:bg-muted justify-start">
+                          <Link href="/login">Login</Link>
+                        </Button>
+                        <Button className="btn-minimal justify-start">
+                          <Link href="/signup">Join TripSage</Link>
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

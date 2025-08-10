@@ -1,6 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useAuth } from "@/hooks/use-auth"
+import { getForumPosts, PostWithProfile, getAllPostsDebug } from "@/lib/post-helpers"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,139 +33,215 @@ const forumCategories = [
   { id: "solo", name: "Solo Travel", count: 78 },
 ]
 
-const forumDiscussions = [
+// Fallback sample forum posts when database is empty
+const fallbackForumPosts: PostWithProfile[] = [
   {
-    id: 1,
-    title: "Best hidden gems in Tokyo for food lovers?",
-    author: {
-      name: "Robert Downey Jr.",
-      avatar: "/images/rdj.jpg",
-      verified: true,
-    },
-    category: "destinations",
-    content: "Just got back from an amazing trip to Tokyo and discovered some incredible local spots that aren't in the guidebooks. The ramen shop in Shibuya's backstreets was life-changing! Anyone have recommendations for authentic local experiences?",
-    replies: 23,
-    views: 456,
-    likes: 67,
-    timestamp: "2 hours ago",
-    tags: ["Tokyo", "Food", "Local Experience"],
-    isPinned: false,
-    isHot: true,
+    id: 'sample-1',
+    user_id: 'rdj-user',
+    title: 'Best time to visit Iceland?',
+    content: 'Planning a trip to Iceland and wondering about the best time to visit. I want to see the Northern Lights but also want to avoid extreme weather. Any recommendations? The landscapes there look absolutely incredible!',
+    images: null,
+    location: 'Iceland',
+    tags: ['forum', 'Iceland', 'Northern Lights', 'Planning'],
+    trip_dates: null,
+    looking_for_companions: false,
+    max_companions: null,
+    likes_count: 156,
+    comments_count: 23,
+    created_at: '2025-01-15T10:00:00Z',
+    updated_at: '2025-01-15T10:00:00Z',
+    profiles: {
+      username: 'robert_downey_jr',
+      full_name: 'Robert Downey Jr.',
+      avatar_url: '/images/rdj.jpg'
+    }
   },
   {
-    id: 2,
-    title: "Solo travel safety tips for female travelers",
-    author: {
-      name: "Ryan Gosling",
-      avatar: "/images/ryan-gosling.jpg",
-      verified: true,
-    },
-    category: "safety",
-    content: "Planning my first solo trip to Europe and would love to hear from experienced solo travelers about safety tips, especially for women. What are your must-know safety practices?",
-    replies: 45,
-    views: 892,
-    likes: 134,
-    timestamp: "5 hours ago",
-    tags: ["Solo Travel", "Safety", "Europe"],
-    isPinned: true,
-    isHot: false,
+    id: 'sample-2',
+    user_id: 'henry-cavill-user',
+    title: 'Solo travel safety tips for women',
+    content: 'I\'m planning my first solo trip to Europe and would love to hear from experienced solo travelers about safety tips, especially for women. What are your must-know safety practices? I want to make sure I can explore confidently and safely.',
+    images: null,
+    location: 'Europe',
+    tags: ['forum', 'Solo Travel', 'Safety', 'Women Travelers'],
+    trip_dates: null,
+    looking_for_companions: false,
+    max_companions: null,
+    likes_count: 234,
+    comments_count: 45,
+    created_at: '2025-01-14T15:30:00Z',
+    updated_at: '2025-01-14T15:30:00Z',
+    profiles: {
+      username: 'henry_cavill',
+      full_name: 'Henry Cavill',
+      avatar_url: '/images/henry-cavill.jpg'
+    }
   },
   {
-    id: 3,
-    title: "Budget-friendly accommodation in Paris",
-    author: {
-      name: "Tom Cruise",
-      avatar: "/images/tom-cruise.jpg",
-      verified: true,
-    },
-    category: "budget",
-    content: "Looking for affordable but safe accommodation options in Paris. Any recommendations for budget hotels or hostels that are well-located and clean?",
-    replies: 31,
-    views: 567,
-    likes: 89,
-    timestamp: "1 day ago",
-    tags: ["Paris", "Budget", "Accommodation"],
-    isPinned: false,
-    isHot: false,
+    id: 'sample-3',
+    user_id: 'brad-pitt-user',
+    title: 'Budget accommodation in Paris',
+    content: 'Looking for affordable but safe accommodation options in Paris. Any recommendations for budget hotels or hostels that are well-located and clean? I want to experience the city without breaking the bank.',
+    images: null,
+    location: 'Paris, France',
+    tags: ['forum', 'Paris', 'Budget', 'Accommodation'],
+    trip_dates: null,
+    looking_for_companions: false,
+    max_companions: null,
+    likes_count: 189,
+    comments_count: 31,
+    created_at: '2025-01-13T09:15:00Z',
+    updated_at: '2025-01-13T09:15:00Z',
+    profiles: {
+      username: 'brad_pitt',
+      full_name: 'Brad Pitt',
+      avatar_url: '/images/brad-pitt.jpg'
+    }
   },
   {
-    id: 4,
-    title: "Adventure activities in Iceland - recommendations needed!",
-    author: {
-      name: "Henry Cavill",
-      avatar: "/images/henry-cavill.jpg",
-      verified: true,
-    },
-    category: "destinations",
-    content: "Heading to Iceland next month and want to experience the best adventure activities. Glacier hiking, ice cave exploration, northern lights hunting - what should I prioritize?",
-    replies: 67,
-    views: 1234,
-    likes: 234,
-    timestamp: "2 days ago",
-    tags: ["Iceland", "Adventure", "Activities"],
-    isPinned: false,
-    isHot: true,
+    id: 'sample-4',
+    user_id: 'tom-cruise-user',
+    title: 'Travel insurance recommendations',
+    content: 'What travel insurance companies do you recommend? I\'m looking for good coverage at a reasonable price, especially for international travel. Safety first, right?',
+    images: null,
+    location: 'Global',
+    tags: ['forum', 'Insurance', 'Planning', 'Safety'],
+    trip_dates: null,
+    looking_for_companions: false,
+    max_companions: null,
+    likes_count: 142,
+    comments_count: 28,
+    created_at: '2025-01-12T14:45:00Z',
+    updated_at: '2025-01-12T14:45:00Z',
+    profiles: {
+      username: 'tom_cruise',
+      full_name: 'Tom Cruise',
+      avatar_url: '/images/tom-cruise.jpg'
+    }
   },
   {
-    id: 5,
-    title: "Group travel vs solo travel - what's your preference?",
-    author: {
-      name: "Brad Pitt",
-      avatar: "/images/brad-pitt.jpg",
-      verified: true,
-    },
-    category: "general",
-    content: "I've done both solo and group travel, and each has its unique advantages. Solo travel gives you complete freedom, while group travel creates amazing shared memories. What's your experience?",
-    replies: 89,
-    views: 1567,
-    likes: 345,
-    timestamp: "3 days ago",
-    tags: ["Solo Travel", "Group Travel", "Discussion"],
-    isPinned: false,
-    isHot: true,
+    id: 'sample-5',
+    user_id: 'ryan-gosling-user',
+    title: 'Best apps for travel planning',
+    content: 'What are your favorite apps for planning trips? I\'m looking for recommendations for booking flights, finding accommodation, and discovering local attractions. Technology makes everything so much easier these days!',
+    images: null,
+    location: 'Global',
+    tags: ['forum', 'Apps', 'Planning', 'Technology'],
+    trip_dates: null,
+    looking_for_companions: false,
+    max_companions: null,
+    likes_count: 203,
+    comments_count: 37,
+    created_at: '2025-01-11T11:20:00Z',
+    updated_at: '2025-01-11T11:20:00Z',
+    profiles: {
+      username: 'ryan_gosling',
+      full_name: 'Ryan Gosling',
+      avatar_url: '/images/ryan-gosling.jpg'
+    }
   },
   {
-    id: 6,
-    title: "Photography tips for travel bloggers",
-    author: {
-      name: "Jake Gyllenhaal",
-      avatar: "/images/Jake Gyllenhaal.jpg",
-      verified: true,
-    },
-    category: "general",
-    content: "Fellow photographers, what are your essential tips for capturing amazing travel photos? Looking for advice on equipment, composition, and editing techniques.",
-    replies: 42,
-    views: 789,
-    likes: 156,
-    timestamp: "4 days ago",
-    tags: ["Photography", "Travel Blogging", "Tips"],
-    isPinned: false,
-    isHot: false,
-  },
+    id: 'sample-6',
+    user_id: 'jake-gyllenhaal-user',
+    title: 'Hidden gems in Morocco',
+    content: 'I\'ve been to the main tourist spots in Morocco, but I\'m looking for those hidden gems that most travelers miss. Any recommendations for off-the-beaten-path experiences? I love discovering authentic local culture.',
+    images: null,
+    location: 'Morocco',
+    tags: ['forum', 'Morocco', 'Hidden Gems', 'Local Culture'],
+    trip_dates: null,
+    looking_for_companions: false,
+    max_companions: null,
+    likes_count: 167,
+    comments_count: 29,
+    created_at: '2025-01-10T16:45:00Z',
+    updated_at: '2025-01-10T16:45:00Z',
+    profiles: {
+      username: 'jake_gyllenhaal',
+      full_name: 'Jake Gyllenhaal',
+      avatar_url: '/images/Jake Gyllenhaal.jpg'
+    }
+  }
 ]
 
 export default function ForumPage() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
+  const [posts, setPosts] = useState<PostWithProfile[]>([])
+  const [loadingPosts, setLoadingPosts] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [sortBy, setSortBy] = useState("recent")
 
-  const filteredDiscussions = forumDiscussions.filter((discussion) => {
-    const matchesSearch = discussion.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         discussion.content.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || discussion.category === selectedCategory
-    return matchesSearch && matchesCategory
+    const loadPosts = async () => {
+      try {
+        console.log('Loading forum posts...')
+        const forumPosts = await getForumPosts()
+        console.log('Forum posts found:', forumPosts)
+      
+      // If no forum posts found in database, use fallback sample data
+      if (forumPosts.length === 0) {
+        console.log('No forum posts in database, using fallback sample data')
+        setPosts(fallbackForumPosts)
+      } else {
+        // Combine real posts with sample posts, ensuring no duplicates
+        const realPostIds = new Set(forumPosts.map(p => p.id))
+        const uniqueSamplePosts = fallbackForumPosts.filter(p => !realPostIds.has(p.id))
+        const combinedPosts = [...forumPosts, ...uniqueSamplePosts]
+        setPosts(combinedPosts)
+      }
+      } catch (error) {
+        console.error('Error loading forum posts:', error)
+      // On error, use fallback data
+      setPosts(fallbackForumPosts)
+      }
+      setLoadingPosts(false)
+    }
+
+  useEffect(() => {
+    loadPosts()
+  }, [])
+
+  // Refresh posts when the page becomes visible (e.g., after creating a new post)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        loadPosts()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange)
+  }, [])
+
+  const handleCreateClick = () => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
+    router.push('/forum/create')
+  }
+
+  const handleRefresh = () => {
+    setLoadingPosts(true)
+    loadPosts()
+  }
+
+  const filteredDiscussions = posts.filter((post) => {
+    const matchesSearch = post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         post.content.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesSearch
   })
 
   const sortedDiscussions = [...filteredDiscussions].sort((a, b) => {
     switch (sortBy) {
       case "recent":
-        return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       case "popular":
-        return b.likes - a.likes
+        return (b.likes_count || 0) - (a.likes_count || 0)
       case "replies":
-        return b.replies - a.replies
+        return (b.comments_count || 0) - (a.comments_count || 0)
       case "views":
-        return b.views - a.views
+        return 0 // TODO: implement views count
       default:
         return 0
     }
@@ -237,6 +316,21 @@ export default function ForumPage() {
 
           {/* Main Content */}
           <div className="flex-1 space-y-6">
+            {/* Info Message */}
+            <Card className="card-minimal bg-blue-50 border-blue-200">
+              <CardContent className="p-4">
+                <div className="flex items-center space-x-3">
+                  <MessageCircle className="h-5 w-5 text-blue-600" />
+                  <div className="flex-1">
+                    <p className="text-sm text-blue-800">
+                      <strong>Welcome to the Travel Forum!</strong> Start discussions, ask questions, and connect with fellow travelers. 
+                      Your new posts will appear here automatically. Use the refresh button to see the latest content.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Header Actions */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
@@ -254,8 +348,20 @@ export default function ForumPage() {
                 <span className="text-muted-foreground">
                   {filteredDiscussions.length} discussions
                 </span>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={handleRefresh}
+                  disabled={loadingPosts}
+                  className="btn-minimal-outline"
+                >
+                  <svg className="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Refresh
+                </Button>
               </div>
-              <Button className="btn-minimal">
+              <Button className="btn-minimal" onClick={handleCreateClick}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Discussion
               </Button>
@@ -263,94 +369,86 @@ export default function ForumPage() {
 
             {/* Discussions */}
             <div className="space-y-4">
-              {sortedDiscussions.map((discussion) => (
-                <Card key={discussion.id} className="card-minimal hover:border-foreground transition-colors">
-                  <CardContent className="p-6">
-                    <div className="flex items-start space-x-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={discussion.author.avatar} alt={discussion.author.name} />
-                        <AvatarFallback>
-                          {discussion.author.name.split(" ").map(n => n[0]).join("")}
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      <div className="flex-1 space-y-3">
-                        <div className="flex items-start justify-between">
-                          <div className="space-y-1">
-                            <div className="flex items-center space-x-2">
-                              <h3 className="text-heading text-lg font-semibold hover:text-foreground cursor-pointer">
-                                {discussion.title}
-                              </h3>
-                              {discussion.isPinned && (
-                                <Badge className="bg-foreground text-background rounded-none text-xs">
-                                  Pinned
-                                </Badge>
-                              )}
-                              {discussion.isHot && (
-                                <Badge className="bg-red-500 text-white rounded-none text-xs">
-                                  Hot
-                                </Badge>
-                              )}
+              {loadingPosts ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
+                </div>
+              ) : sortedDiscussions.length > 0 ? (
+                sortedDiscussions.map((post) => (
+                  <Card key={post.id} className="card-minimal hover:border-foreground transition-colors">
+                    <CardContent className="p-6">
+                      <div className="flex items-start space-x-4">
+                        <Avatar className="h-12 w-12">
+                          <AvatarImage src={post.profiles?.avatar_url || "/placeholder-user.jpg"} alt={post.profiles?.username || 'User'} />
+                          <AvatarFallback>
+                            {(post.profiles?.username || post.profiles?.full_name || 'U')
+                              .split(" ")
+                              .map(n => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div className="space-y-1">
+                              <div className="flex items-center space-x-2">
+                                <h3 className="text-heading text-lg font-semibold hover:text-foreground cursor-pointer">
+                                  {post.title}
+                                </h3>
+                              </div>
+                              <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                                <span className="flex items-center space-x-1">
+                                  <span className="font-semibold">{post.profiles?.username || post.profiles?.full_name || 'Anonymous'}</span>
+                                </span>
+                                <span className="flex items-center space-x-1">
+                                  <Clock className="h-3 w-3" />
+                                  {new Date(post.created_at).toLocaleDateString()}
+                                </span>
+                              </div>
                             </div>
+                          </div>
+
+                          <p className="text-muted-foreground line-clamp-2">
+                            {post.content}
+                          </p>
+
+                          <div className="flex items-center justify-between">
                             <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                               <span className="flex items-center space-x-1">
-                                <span className="font-semibold">{discussion.author.name}</span>
-                                {discussion.author.verified && (
-                                  <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                                )}
+                                <MessageSquare className="h-4 w-4" />
+                                {post.comments_count || 0}
                               </span>
                               <span className="flex items-center space-x-1">
-                                <Clock className="h-3 w-3" />
-                                {discussion.timestamp}
+                                <ThumbsUp className="h-4 w-4" />
+                                {post.likes_count || 0}
                               </span>
                             </div>
-                          </div>
-                        </div>
 
-                        <p className="text-muted-foreground line-clamp-2">
-                          {discussion.content}
-                        </p>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                            <span className="flex items-center space-x-1">
-                              <MessageSquare className="h-4 w-4" />
-                              {discussion.replies}
-                            </span>
-                            <span className="flex items-center space-x-1">
-                              <ThumbsUp className="h-4 w-4" />
-                              {discussion.likes}
-                            </span>
-                            <span className="flex items-center space-x-1">
-                              <Users className="h-4 w-4" />
-                              {discussion.views}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center space-x-2">
-                            {discussion.tags.map((tag) => (
-                              <Badge key={tag} variant="secondary" className="text-xs bg-muted text-foreground rounded-none">
-                                {tag}
-                              </Badge>
-                            ))}
+                            <div className="flex items-center space-x-2">
+                              {post.tags && post.tags.length > 0 && post.tags.map((tag) => (
+                                <Badge key={tag} variant="secondary" className="text-xs bg-muted text-foreground rounded-none">
+                                  #{tag}
+                                </Badge>
+                              ))}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <Card className="card-minimal">
+                  <CardContent className="p-12 text-center">
+                    <MessageCircle className="h-16 w-16 text-foreground mx-auto mb-4" />
+                    <h3 className="text-heading text-lg mb-2">No forum posts yet</h3>
+                    <p className="text-muted-foreground">Be the first to start a discussion!</p>
                   </CardContent>
                 </Card>
-              ))}
+              )}
             </div>
 
-            {filteredDiscussions.length === 0 && (
-              <Card className="card-minimal">
-                <CardContent className="p-12 text-center">
-                  <MessageCircle className="h-16 w-16 text-foreground mx-auto mb-4" />
-                  <h3 className="text-heading text-lg mb-2">No discussions found</h3>
-                  <p className="text-muted-foreground">Try adjusting your search or filters to find more discussions.</p>
-                </CardContent>
-              </Card>
-            )}
+
           </div>
         </div>
       </div>

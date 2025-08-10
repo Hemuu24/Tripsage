@@ -110,3 +110,112 @@
 .input-minimal {
   @apply bg-background border-2 border-border focus:border-foreground rounded-none px-4 py-3 transition-all duration-300;
 }
+
+.input-with-icon {
+  @apply bg-background border-2 border-border focus:border-foreground rounded-none py-3 transition-all duration-300;
+}
+
+/* Shiny Text Animation */
+.shiny-text {
+  background: linear-gradient(
+    110deg,
+    #ffffff 45%,
+    #8b5cf6 50%,
+    #ffffff 55%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shiny-text-animation 5s ease-in-out infinite;
+  font-weight: 500;
+}
+
+.shiny-text.disabled {
+  animation: none;
+  background: #6b7280;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes shiny-text-animation {
+  0% {
+    background-position: -200% 0;
+  }
+  50% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Magic Bento Effects */
+.magic-glow-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.magic-glow-card a, 
+.magic-glow-card button {
+  position: relative;
+  z-index: 10;
+}
+
+.magic-glow-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(132, 0, 255, 0.3),
+    transparent,
+    rgba(132, 0, 255, 0.3)
+  );
+  border-radius: inherit;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: xor;
+  -webkit-mask-composite: xor;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.magic-glow-card:hover::before {
+  opacity: 1;
+}
+
+.magic-glow-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(132, 0, 255, 0.1),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.magic-glow-card:hover::after {
+  opacity: 1;
+}
+
+.magic-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(132, 0, 255, 1);
+  box-shadow: 0 0 6px rgba(132, 0, 255, 0.6);
+  pointer-events: none;
+  z-index: 5;
+}

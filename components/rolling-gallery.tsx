@@ -15,9 +15,9 @@ const destinations = [
 
 export function RollingGallery() {
   const [offset, setOffset] = useState(0)
-  const requestRef = useRef<number>()
+  const requestRef = useRef<number | null>(null)
   const speed = 0.5 // px per frame (slower)
-  const cardWidth = 288 + 24 // w-72 + gap-6
+  const cardWidth = 400 + 32 // w-96 + gap-8
   const totalCards = destinations.length * 3 // tripled for seamless loop
   const totalWidth = cardWidth * totalCards
 
@@ -73,12 +73,12 @@ export function RollingGallery() {
   return (
     <div
       className="w-full overflow-hidden py-8 relative"
-      style={{ height: 192 }} // h-48
+      style={{ height: 320 }} // h-80 for larger images
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
       <div
-        className="absolute top-0 left-0 flex gap-6"
+        className="absolute top-0 left-0 flex gap-8"
         style={{
           width: totalWidth,
           transform: `translateX(-${offset}px)`,
@@ -88,7 +88,7 @@ export function RollingGallery() {
         {galleryImages.map((destination, index) => (
           <div
             key={`${destination.name}-${index}`}
-            className="relative flex-shrink-0 w-72 h-48 border border-border overflow-hidden group cursor-pointer bg-card"
+            className="relative flex-shrink-0 w-96 h-80 border-2 border-border overflow-hidden group cursor-pointer bg-card shadow-lg hover:shadow-xl transition-shadow duration-300"
           >
             <img
               src={destination.image}
@@ -96,8 +96,8 @@ export function RollingGallery() {
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-transparent to-transparent" />
-            <div className="absolute bottom-4 left-4 text-background">
-              <h3 className="text-lg font-display font-bold">{destination.name}</h3>
+            <div className="absolute bottom-6 left-6 text-background">
+              <h3 className="text-xl font-display font-bold drop-shadow-lg">{destination.name}</h3>
             </div>
             <div className="absolute inset-0 bg-foreground/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </div>

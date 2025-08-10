@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { MapPin, Users, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { RollingGallery } from "./rolling-gallery"
+import SplitText from "@/components/ui/split-text"
 
 export function Hero() {
   const [searchQuery, setSearchQuery] = useState("")
@@ -24,18 +25,47 @@ export function Hero() {
 
           {/* Main heading */}
           <div className="space-y-8">
-            <h1 className="text-hero text-6xl md:text-8xl lg:text-9xl text-foreground leading-none">
-              Discover.
-              <br />
-              Connect.
-              <br />
-              Explore.
-            </h1>
+            <div className="text-hero text-6xl md:text-8xl lg:text-9xl text-foreground leading-none">
+              <SplitText 
+                text="Discover." 
+                splitType="chars"
+                delay={80}
+                duration={0.8}
+                className="block mb-4"
+                from={{ opacity: 0, y: 100, rotationX: -90 }}
+                to={{ opacity: 1, y: 0, rotationX: 0 }}
+              />
+              <SplitText 
+                text="Connect." 
+                splitType="chars"
+                delay={100}
+                duration={0.8}
+                className="block mb-4"
+                from={{ opacity: 0, y: 100, rotationX: -90 }}
+                to={{ opacity: 1, y: 0, rotationX: 0 }}
+              />
+              <SplitText 
+                text="Explore." 
+                splitType="chars"
+                delay={120}
+                duration={0.8}
+                className="block"
+                from={{ opacity: 0, y: 100, rotationX: -90 }}
+                to={{ opacity: 1, y: 0, rotationX: 0 }}
+              />
+            </div>
 
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-medium">
-              Join a community of like-minded travelers. Plan adventures, share experiences, and explore the world with
-              your tribe, not solo.
-            </p>
+            <div className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed font-medium">
+              <SplitText 
+                text="Join a community of like-minded travelers. Plan adventures, share experiences, and explore the world with your tribe, not solo."
+                splitType="words"
+                delay={50}
+                duration={0.6}
+                from={{ opacity: 0, y: 30 }}
+                to={{ opacity: 1, y: 0 }}
+                threshold={0.2}
+              />
+            </div>
           </div>
 
           {/* Search bar */}
